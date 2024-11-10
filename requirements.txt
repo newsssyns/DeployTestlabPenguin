@@ -1,4 +1,4 @@
 streamlit
 pandas
 numpy==1.26.4
-scikit-surprise @ git+https://github.com/NicolasHug/Surprise.git@master#egg=scikit-surprise
+scikit-learn
