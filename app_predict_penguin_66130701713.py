@@ -1,49 +1,29 @@
-
 import streamlit as st
 import pickle
 import pandas as pd
 
 # Load the saved model and encoders
-with open('model_penguin_66130701713.pkl', 'rb') as file:
-    model, species_encoder, island_encoder, sex_encoder = pickle.load(file)
+@st.cache_resource  # Cache the model loading to avoid reloading on every interaction
+def load_model_and_encoders():
+    try:
+        with open('model_penguin_66130701713.pkl', 'rb') as file:
+            loaded_data = pickle.load(file)
+            # Assuming loaded_data is a tuple/list containing model and encoders:
+            model = loaded_data[0]
+            species_encoder = loaded_data[1]
+            island_encoder = loaded_data[2]
+            sex_encoder = loaded_data[3]
+        return model, species_encoder, island_encoder, sex_encoder
+    except FileNotFoundError:
+        st.error("Model file not found. Please check the file path.")
+        return None, None, None, None
 
-# Define the prediction function
-def predict_penguin_species(island, bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex):
-    # Create a DataFrame for the input features
-    input_data = pd.DataFrame({
-        'island': [island],
-        'bill_length_mm': [bill_length_mm],
-        'bill_depth_mm': [bill_depth_mm],
-        'flipper_length_mm': [flipper_length_mm],
-        'body_mass_g': [body_mass_g],
-        'sex': [sex]
-    })
+# Load model and encoders
+model, species_encoder, island_encoder, sex_encoder = load_model_and_encoders()
 
-    # Encode categorical features
-    input_data['island'] = island_encoder.transform(input_data['island'])
-    input_data['sex'] = sex_encoder.transform(input_data['sex'])
-
-    # Make prediction
-    prediction = model.predict(input_data)[0]
-
-    # Decode prediction to species name
-    predicted_species = species_encoder.inverse_transform([prediction])[0]
-
-    return predicted_species
-
-# Streamlit app
-st.title("Penguin Species Prediction")
-
-# Input fields
-island = st.selectbox("Island", island_encoder.classes_)
-bill_length_mm = st.number_input("Bill Length (mm)")
-bill_depth_mm = st.number_input("Bill Depth (mm)")
-flipper_length_mm = st.number_input("Flipper Length (mm)")
-body_mass_g = st.number_input("Body Mass (g)")
-sex = st.selectbox("Sex", sex_encoder.classes_)
-
-# Prediction button
-if st.button("Predict"):
-    predicted_species = predict_penguin_species(island, bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex)
-    st.success(f"The predicted species is: **{predicted_species}**")
-
+# Check if loading was successful before proceeding
+if model is not None:
+    st.success("Model and encoders loaded successfully!")
+    # Here you can add code to input user data and make predictions
+else:
+    st.warning("Could not load the model and encoders. Please fix the issue to proceed.")
