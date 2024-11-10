@@ -5,7 +5,9 @@ import pandas as pd
 
 # Load the saved model and encoders
 with open('model_penguin_66130701713.pkl', 'rb') as file:
-    model, species_encoder, island_encoder, sex_encoder = pickle.load(file)
+    loaded_data = pickle.load(file)
+    model = loaded_data[0]
+    species_encoder = loaded_data[1]
 
 # Define the prediction function
 def predict_penguin_species(island, bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex):
